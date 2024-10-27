@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {SearchLyricsResponse} from "../generated/api-types.ts";
 import {searchLyrics} from "../api.ts";
 import {Link} from "react-router-dom";
-import {TextField} from "@mui/material";
+import {Box, List, ListItemButton, TextField, Typography} from "@mui/material";
 
 export function Search() {
     const [query, setQuery] = useState('');
@@ -37,9 +37,14 @@ export function Search() {
             />
             <div>
                 {results && results.map((result) => (
-                    <div key={result.id}>
-                        <Link to={`/lyrics/${result.id}`}>{result.trackName} - {result.artistName}</Link>
-                    </div>
+                    <List>
+                        <ListItemButton key={result.id} component={Link} to={`/lyrics/${result.id}`}>
+                            <Box>
+                                <Typography variant="button">{result.trackName}</Typography>
+                                <Typography variant="subtitle2" color="textSecondary">{result.artistName}</Typography>
+                            </Box>
+                        </ListItemButton>
+                    </List>
                 ))}
             </div>
         </div>

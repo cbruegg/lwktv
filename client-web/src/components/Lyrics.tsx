@@ -10,14 +10,14 @@ export function Lyrics() {
     }, [lyrics]);
 
     return (
-        <div>
+        <>
             {lyrics && (
                 <div>
                     <h2>{lyrics.trackName} - {lyrics.artistName}</h2>
                     <PlainLyrics lyrics={lyrics.plainLyrics}/>
                 </div>
             )}
-        </div>
+        </>
     );
 }
 
