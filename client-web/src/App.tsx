@@ -1,8 +1,9 @@
 import './App.css';
 import {createBrowserRouter} from "react-router-dom";
 import {Lyrics} from "./components/Lyrics.tsx";
-import {Root} from "./components/Root.tsx";
+import {Search} from "./components/Search.tsx";
 import {lyricsLoader} from "./components/LyricsLoader.ts";
+import {Root} from "./components/Root.tsx";
 
 // Specification:
 // 1. On start, show search bar
@@ -17,11 +18,17 @@ import {lyricsLoader} from "./components/LyricsLoader.ts";
 export const router = createBrowserRouter([
     {
         path: "/",
-        element: <Root/>
-    },
-    {
-        path: "/lyrics/:id",
-        element: <Lyrics/>,
-        loader: lyricsLoader
+        element: <Root/>,
+        children: [
+            {
+                path: "",
+                element: <Search/>
+            },
+            {
+                path: "lyrics/:id",
+                element: <Lyrics/>,
+                loader: lyricsLoader
+            }
+        ]
     }
 ]);
