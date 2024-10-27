@@ -13,23 +13,28 @@
 import { LrcLibGetLyricsResponse } from './lrclib-api-types';
 import { processLyrics, ProcessLyricsOptions } from './lyrics-processor';
 
-// TODO Global rate limit
-
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		const parsedUrl = new URL(request.url);
+		const responseHeaders = {
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Headers': 'Authorization',
+			'Content-Type': 'application/json'
+		};
 
-		console.log({ parsedUrl });
+		if (request.method === "OPTIONS") {
+			return new Response(null, { status: 204, headers: responseHeaders });
+		}
+
+		if (request.headers.get('Authorization') !== `Bearer ${env.AUTHENTICATION_TOKEN}`) {
+			return new Response('Unauthorized', { status: 401, headers: responseHeaders });
+		}
+
+		const parsedUrl = new URL(request.url);
 
 		const lrcLibFetchOptions = {
 			headers: {
 				'User-Agent': 'LWKTV/1.0.0 (github.com/cbruegg)'
 			}
-		};
-
-		const responseHeaders = {
-			'Access-Control-Allow-Origin': '*',
-			'Content-Type': 'application/json'
 		};
 
 		if (parsedUrl.pathname.startsWith('/search')) {
@@ -56,6 +61,6 @@ export default {
 			return new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)), { headers: responseHeaders });
 		}
 
-		return new Response('Hello World!');
+		return new Response('Not found', { status: 404, headers: responseHeaders });
 	}
 } satisfies ExportedHandler<Env>;

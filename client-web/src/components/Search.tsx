@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {SearchLyricsResponse} from "../generated/api-types.ts";
 import {searchLyrics} from "../api.ts";
 import {Link} from "react-router-dom";
+import {TextField} from "@mui/material";
 
 export function Search() {
     const [query, setQuery] = useState('');
@@ -27,8 +28,8 @@ export function Search() {
     }, [query]);
 
     return (
-        <>
-            <input
+        <div>
+            <TextField
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -41,6 +42,6 @@ export function Search() {
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 }

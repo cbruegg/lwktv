@@ -2,4 +2,5 @@
 
 interface Env {
 	OPENAI_API_TOKEN: string;
+	AUTHENTICATION_TOKEN: string;
 }
