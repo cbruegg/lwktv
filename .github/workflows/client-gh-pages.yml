@@ -32,6 +32,7 @@ jobs:
       - name: Build with Node
         run: |
           cd client-web
+          npm install
           npm run build
           cd ..
           mv client-web/dist _site
