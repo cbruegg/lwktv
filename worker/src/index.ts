@@ -10,28 +10,47 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
+import { LrcLibGetLyricsResponse } from './lrclib-api-types';
+import { processLyrics, ProcessLyricsOptions } from './lyrics-processor';
 
 // TODO Global rate limit
-// TODO Convert traditional to simplified Chinese (maybe optionally)
-// TODO Add Pinyin
-// TODO Add optional translation
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const parsedUrl = new URL(request.url);
+
+		console.log({ parsedUrl });
+
+		const lrcLibFetchOptions = {
+			headers: {
+				'User-Agent': 'LWKTV/1.0.0 (github.com/cbruegg)'
+			}
+		};
+
 		if (parsedUrl.pathname.startsWith('/search')) {
 			const query = new URL(request.url).searchParams.get('q');
-			const searchLyricsResponse = await fetch(`https://lrclib.net/api/search?q=${query}`);
+
+			const searchLyricsResponse = await fetch(`https://lrclib.net/api/search?q=${query}`, lrcLibFetchOptions);
 			const searchLyricsData = await searchLyricsResponse.json();
 			return new Response(JSON.stringify(searchLyricsData));
 		}
 		if (parsedUrl.pathname.startsWith('/lyrics')) {
-			const id = parsedUrl.searchParams.get('id');
-			const getLyricsResponse = await fetch(`https://lrclib.net/api/get/${id}`);
-			const getLyricsData = await getLyricsResponse.json();
-			return new Response(JSON.stringify(getLyricsData));
+			const id = parsedUrl.pathname.split('/')[2];
+			const options: ProcessLyricsOptions = {};
+			if (parsedUrl.searchParams.get('traditionalToSimplified') === 'true') {
+				options.traditionalToSimplified = true;
+			}
+			if (parsedUrl.searchParams.get('addPinyin') === 'true') {
+				options.addPinyin = true;
+			}
+			if (parsedUrl.searchParams.get('addTranslation') === 'true') {
+				options.addTranslation = true;
+			}
+			const getLyricsResponse = await fetch(`https://lrclib.net/api/get/${id}`, lrcLibFetchOptions);
+			const getLyricsData = await getLyricsResponse.json() as LrcLibGetLyricsResponse;
+			return new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)));
 		}
 
 		return new Response('Hello World!');
-	},
+	}
 } satisfies ExportedHandler<Env>;

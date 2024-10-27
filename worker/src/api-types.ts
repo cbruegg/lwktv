@@ -13,5 +13,5 @@ interface GetLyricsResponse {
 	duration: number;
 	instrumental: boolean;
 	plainLyrics: string;
-	syncedLyrics: string;
+	syncedLyrics: string | null;
 }
