@@ -18,7 +18,8 @@ export function AuthDialog({open, onSave}: { open: boolean, onSave: () => void }
             <DialogContentText>
                 An authentication token is required.
             </DialogContentText>
-            <TextField label="Token" variant="filled" value={token} onChange={(e) => setToken(e.target.value)}/>
+            <TextField type="password" label="Token" variant="filled" value={token}
+                       onChange={(e) => setToken(e.target.value)}/>
         </DialogContent>
         <DialogActions>
             <Button onClick={save} autoFocus>
