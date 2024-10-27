@@ -60,9 +60,13 @@ function LyricsLine({line}: { line: string }) {
     const original = hasPinyin ? line.split("~~~")[0] : line;
     const pinyin = hasPinyin ? line.split("~~~")[1] : null;
     return (
-        <div style={{lineHeight: "0.5em", padding: "0.125em"}}>
-            <p>{original.trim()}</p>
-            <p>{pinyin?.trim()}</p>
-        </div>
+        <p>
+            <span>{original.trim()}</span>
+            {pinyin && <>
+                <br/>
+                <span>{pinyin.trim()}</span>
+            </>
+            }
+        </p>
     );
 }
