@@ -1,13 +1,32 @@
 import {useLoaderData} from "react-router-dom";
 import {GetLyricsResponse} from "../generated/api-types.ts";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import {getLyrics} from "../api.ts";
+import {CircularProgress} from "@mui/material";
 
 export function Lyrics() {
-    const lyrics = useLoaderData() as GetLyricsResponse;
+    const id = useLoaderData() as number;
+    const [lyrics, setLyrics] = useState<GetLyricsResponse | null>(null);
 
     useEffect(() => {
-        document.title = `${lyrics.trackName} - ${lyrics.artistName}`;
+        (async () => {
+            setLyrics(null);
+            // TODO Allow setting options
+            setLyrics(await getLyrics(id, {}));
+        })();
+    }, [id]);
+
+    useEffect(() => {
+        if (lyrics === null) {
+            document.title = "Loading...";
+        } else {
+            document.title = `${lyrics.trackName} - ${lyrics.artistName}`;
+        }
     }, [lyrics]);
+
+    if (lyrics === null) {
+        return <CircularProgress/>;
+    }
 
     return (
         <>

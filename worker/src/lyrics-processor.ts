@@ -33,18 +33,18 @@ export async function processLyrics(lrcLibLyrics: LrcLibGetLyricsResponse, openA
 		'[00:33.98] 我很期待和家人一起度過一個難忘的假期。\n';
 	systemInstructions += '```\n';
 	systemInstructions += 'You should output:\n';
-	systemInstructions += '```\n';
+	systemInstructions += '\n';
 	if (traditionalToSimplified && addPinyin) {
-		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí。\n' +
-			'[00:33.98] 我很期待和家人一起度过一个难忘的假期。Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī。\n';
+		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。 ~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí。\n' +
+			'[00:33.98] 我很期待和家人一起度过一个难忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī。\n';
 	} else if (traditionalToSimplified) {
 		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。\n' +
 			'[00:33.98] 我很期待和家人一起度过一个难忘的假期。\n';
 	} else if (addPinyin) {
-		systemInstructions += '[00:26.92] 明年我計劃去中國和台灣旅行，探索當地的歷史文化和美食。míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí。\n' +
-			'[00:33.98] 我很期待和家人一起度過一個難忘的假期。Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī';
+		systemInstructions += '[00:26.92] 明年我計劃去中國和台灣旅行，探索當地的歷史文化和美食。~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí。\n' +
+			'[00:33.98] 我很期待和家人一起度過一個難忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī';
 	}
-	systemInstructions += '```\n';
+	systemInstructions += '\n';
 
 	const completion = await openai.chat.completions.create({
 		model: 'gpt-4o',
