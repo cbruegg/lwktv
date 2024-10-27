@@ -1,11 +1,11 @@
-type SearchLyricsResponse = Array<{
+export type SearchLyricsResponse = Array<{
 	id: number;
 	trackName: string;
 	artistName: string;
 	albumName: string;
 }>
 
-interface GetLyricsResponse {
+export interface GetLyricsResponse {
 	id: number;
 	trackName: string;
 	artistName: string;

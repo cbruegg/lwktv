@@ -4,14 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "copyApiTypes": "mkdir -p src/generated && cp ../worker/src/api-types.ts src/generated/api-types.ts",
+    "dev": "npm run copyApiTypes && vite",
+    "build": "npm run copyApiTypes && tsc -b && vite build",
+    "lint": "npm run copyApiTypes && eslint .",
+    "preview": "npm run copyApiTypes && vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

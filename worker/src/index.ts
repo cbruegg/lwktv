@@ -27,12 +27,17 @@ export default {
 			}
 		};
 
+		const responseHeaders = {
+			'Access-Control-Allow-Origin': '*',
+			'Content-Type': 'application/json'
+		};
+
 		if (parsedUrl.pathname.startsWith('/search')) {
 			const query = new URL(request.url).searchParams.get('q');
 
 			const searchLyricsResponse = await fetch(`https://lrclib.net/api/search?q=${query}`, lrcLibFetchOptions);
 			const searchLyricsData = await searchLyricsResponse.json();
-			return new Response(JSON.stringify(searchLyricsData));
+			return new Response(JSON.stringify(searchLyricsData), { headers: responseHeaders });
 		}
 		if (parsedUrl.pathname.startsWith('/lyrics')) {
 			const id = parsedUrl.pathname.split('/')[2];
@@ -48,7 +53,7 @@ export default {
 			}
 			const getLyricsResponse = await fetch(`https://lrclib.net/api/get/${id}`, lrcLibFetchOptions);
 			const getLyricsData = await getLyricsResponse.json() as LrcLibGetLyricsResponse;
-			return new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)));
+			return new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)), { headers: responseHeaders });
 		}
 
 		return new Response('Hello World!');
