@@ -64,8 +64,9 @@ export default {
 			}
 
 			const cache = caches.default;
-			const cachedResponse = await cache.match(request);
-			console.log({ cacheKey: request, cachedResponse });
+			const cacheKey = new Request(request.url); // Ignore headers
+			const cachedResponse = await cache.match(cacheKey);
+			console.log({ cacheKey: cacheKey.url, cachedResponse });
 			if (cachedResponse !== undefined) {
 				return cachedResponse;
 			}
@@ -74,7 +75,7 @@ export default {
 			const getLyricsData = await getLyricsResponse.json() as LrcLibGetLyricsResponse;
 
 			const response = new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)), { headers: responseHeaders });
-			await cache.put(request, response.clone());
+			await cache.put(cacheKey, response.clone());
 			return response;
 		}
 
