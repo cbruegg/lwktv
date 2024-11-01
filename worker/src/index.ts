@@ -12,6 +12,8 @@
  */
 import { LrcLibGetLyricsResponse } from './lrclib-api-types';
 import { processLyrics, ProcessLyricsOptions } from './lyrics-processor';
+import OpenAI from 'openai';
+import { SearchLyricsResponse } from './api-types';
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
@@ -21,7 +23,7 @@ export default {
 			'Content-Type': 'application/json'
 		};
 
-		if (request.method === "OPTIONS") {
+		if (request.method === 'OPTIONS') {
 			return new Response(null, { status: 204, headers: responseHeaders });
 		}
 
@@ -38,11 +40,14 @@ export default {
 		};
 
 		if (parsedUrl.pathname.startsWith('/search')) {
-			const query = new URL(request.url).searchParams.get('q');
+			const query = new URL(request.url).searchParams.get('q') ?? '';
+			const queryInTraditionalChinese = await convertToTraditionalChinese(query, env.OPENAI_API_TOKEN);
 
-			const searchLyricsResponse = await fetch(`https://lrclib.net/api/search?q=${query}`, lrcLibFetchOptions);
-			const searchLyricsData = await searchLyricsResponse.json();
-			return new Response(JSON.stringify(searchLyricsData), { headers: responseHeaders });
+			const searchLyricsResponse = fetch(`https://lrclib.net/api/search?q=${query}`, lrcLibFetchOptions);
+			const searchLyricsResponseTraditional = fetch(`https://lrclib.net/api/search?q=${queryInTraditionalChinese}`, lrcLibFetchOptions);
+			const searchLyricsData: SearchLyricsResponse = await (await searchLyricsResponse).json();
+			const searchLyricsDataTraditional: SearchLyricsResponse = await (await searchLyricsResponseTraditional).json();
+			return new Response(JSON.stringify(mergeResponses(searchLyricsData, searchLyricsDataTraditional)), { headers: responseHeaders });
 		}
 		if (parsedUrl.pathname.startsWith('/lyrics')) {
 			const id = parsedUrl.pathname.split('/')[2];
@@ -64,3 +69,52 @@ export default {
 		return new Response('Not found', { status: 404, headers: responseHeaders });
 	}
 } satisfies ExportedHandler<Env>;
+
+async function convertToTraditionalChinese(text: string, openAiApiToken: string): Promise<string> {
+	const openai = new OpenAI({ apiKey: openAiApiToken });
+
+	const systemInstructions = 'You operate on song titles. You have the task to replace any simplified Chinese ' +
+		'with traditional Chinese. Do not add any comments. For example, given the following input: \n' +
+		'```\n' +
+		'工厂\n' +
+		'```\n' +
+		'You should output:\n' +
+		'工廠';
+
+	const conversionCompletion = await openai.chat.completions.create({
+		model: 'gpt-4o-mini',
+		messages: [
+			{ role: 'system', content: systemInstructions },
+			{
+				role: 'user',
+				content: text
+			}
+		],
+		max_tokens: 512
+	});
+	console.log({ conversionCompletion });
+	const processedText = conversionCompletion.choices[0].message.content ?? text;
+
+	console.log({ processedText });
+
+	return processedText.trim();
+}
+
+function mergeResponses(a: SearchLyricsResponse, b: SearchLyricsResponse): SearchLyricsResponse {
+	// SearchLyricsResponse is an array of objects that have an ID. Make sure we don't have duplicates.
+	const ids = new Set<number>();
+	const result: SearchLyricsResponse = [];
+	for (const item of a) {
+		if (!ids.has(item.id)) {
+			result.push(item);
+			ids.add(item.id);
+		}
+	}
+	for (const item of b) {
+		if (!ids.has(item.id)) {
+			result.push(item);
+			ids.add(item.id);
+		}
+	}
+	return result;
+}
