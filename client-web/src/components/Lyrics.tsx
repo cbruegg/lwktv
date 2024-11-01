@@ -16,7 +16,7 @@ export function Lyrics() {
             // TODO Allow setting options
             setLyrics(await getLyrics(id, {addTranslation: translate}));
         })();
-    }, [id]);
+    }, [id, translate]);
 
     useEffect(() => {
         if (lyrics === null) {
@@ -43,7 +43,7 @@ export function Lyrics() {
                                     disabled={false}
                                     onChange={e => setSearchParams({
                                         ...searchParams,
-                                        translate: e.target.checked ? "true" : undefined
+                                        translate: e.target.checked ? "true" : "false"
                                     })}/>
                             }
                             label="Translate"/>
@@ -60,7 +60,7 @@ function PlainLyrics({lyrics}: { lyrics: string }) {
     return (
         <>
             {lines.map((line, i) => (
-                <LyricsLine line={line} key={i}/>
+                <LyricsLine line={line.trim()} key={i}/>
             ))}
         </>
     );
@@ -77,7 +77,7 @@ function LyricsLine({line}: { line: string }) {
             {lines.map((line, i) => (
                 <span key={i}>
                     {line}
-                    {i < lines.length - 1 && <br/>}
+                    <br/>
                 </span>
             ))}
         </p>

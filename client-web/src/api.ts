@@ -14,9 +14,10 @@ export async function getLyrics(id: number, options: {
     addTranslation?: boolean
 }): Promise<GetLyricsResponse> {
     const params = new URLSearchParams();
-    if (options.traditionalToSimplified !== undefined) params.set("traditionalToSimplified", "true");
-    if (options.addPinyin !== undefined) params.set("addPinyin", "true");
-    if (options.addTranslation !== undefined) params.set("addTranslation", "true");
+    if (options.traditionalToSimplified !== undefined) params.set("traditionalToSimplified", `${options.traditionalToSimplified}`);
+    if (options.addPinyin !== undefined) params.set("addPinyin", `${options.addPinyin}`);
+    if (options.addTranslation !== undefined) params.set("addTranslation", `${options.addTranslation}`);
+    params.set("api", "v3");
     return (await fetch(`${baseUrl}lyrics/${id}?${params}`, fetchOptions())).json();
 }
 

@@ -20,7 +20,8 @@ export default {
 		const responseHeaders = {
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Headers': 'Authorization',
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json',
+			'Cache-Control': 'public, max-age=1209600'
 		};
 
 		if (request.method === 'OPTIONS') {
@@ -61,9 +62,20 @@ export default {
 			if (parsedUrl.searchParams.get('addTranslation') === 'true') {
 				options.addTranslation = true;
 			}
+
+			const cache = caches.default;
+			const cachedResponse = await cache.match(request);
+			console.log({ cacheKey: request, cachedResponse });
+			if (cachedResponse !== undefined) {
+				return cachedResponse;
+			}
+
 			const getLyricsResponse = await fetch(`https://lrclib.net/api/get/${id}`, lrcLibFetchOptions);
 			const getLyricsData = await getLyricsResponse.json() as LrcLibGetLyricsResponse;
-			return new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)), { headers: responseHeaders });
+
+			const response = new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)), { headers: responseHeaders });
+			await cache.put(request, response.clone());
+			return response;
 		}
 
 		return new Response('Not found', { status: 404, headers: responseHeaders });

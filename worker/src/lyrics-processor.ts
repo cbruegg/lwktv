@@ -40,39 +40,39 @@ export async function processLyrics(lrcLibLyrics: LrcLibGetLyricsResponse, openA
 	if (traditionalToSimplified && addPinyin) {
 		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。 ~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí';
 		if (addTranslation) {
-			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.";
+			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.\n";
 		} else {
 			systemInstructions += '\n';
 		}
 		systemInstructions += '[00:33.98] 我很期待和家人一起度过一个难忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī。\n';
 		if (addTranslation) {
-			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.";
+			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.\n";
 		} else {
 			systemInstructions += '\n';
 		}
 	} else if (traditionalToSimplified) {
 		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。';
 		if (addTranslation) {
-			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.";
+			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.\n";
 		} else {
 			systemInstructions += '\n';
 		}
 		systemInstructions += '[00:33.98] 我很期待和家人一起度过一个难忘的假期。\n';
 		if (addTranslation) {
-			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.";
+			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.\n";
 		} else {
 			systemInstructions += '\n';
 		}
 	} else if (addPinyin) {
 		systemInstructions += '[00:26.92] 明年我計劃去中國和台灣旅行，探索當地的歷史文化和美食。~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí';
 		if (addTranslation) {
-			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.";
+			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.\n";
 		} else {
 			systemInstructions += '\n';
 		}
 		systemInstructions += '[00:33.98] 我很期待和家人一起度過一個難忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī';
 		if (addTranslation) {
-			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.";
+			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.\n";
 		} else {
 			systemInstructions += '\n';
 		}
