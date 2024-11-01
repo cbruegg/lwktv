@@ -27,6 +27,9 @@ export async function processLyrics(lrcLibLyrics: LrcLibGetLyricsResponse, openA
 	if (addPinyin) {
 		systemInstructions += '- Append transcribed Pinyin to each line of the user input. Place the Pinyin transcription right after the Chinese characters, separating them with \' ~~~ \'. Do not add any comments. Retain timestamps if there are any.\n';
 	}
+	if (addTranslation) {
+		systemInstructions += '- Translate the user input from Chinese to English. Do not add any comments. Retain timestamps if there are any.\n';
+	}
 	systemInstructions += 'For example, given the following input:\n';
 	systemInstructions += '```\n';
 	systemInstructions += '[00:26.92] 明年我計劃去中國和台灣旅行，探索當地的歷史文化和美食。\n' +
@@ -35,14 +38,44 @@ export async function processLyrics(lrcLibLyrics: LrcLibGetLyricsResponse, openA
 	systemInstructions += 'You should output:\n';
 	systemInstructions += '\n';
 	if (traditionalToSimplified && addPinyin) {
-		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。 ~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí。\n' +
-			'[00:33.98] 我很期待和家人一起度过一个难忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī。\n';
+		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。 ~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí';
+		if (addTranslation) {
+			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.";
+		} else {
+			systemInstructions += '\n';
+		}
+		systemInstructions += '[00:33.98] 我很期待和家人一起度过一个难忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī。\n';
+		if (addTranslation) {
+			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.";
+		} else {
+			systemInstructions += '\n';
+		}
 	} else if (traditionalToSimplified) {
-		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。\n' +
-			'[00:33.98] 我很期待和家人一起度过一个难忘的假期。\n';
+		systemInstructions += '[00:26.92] 明年我计划去中国和台湾旅行，探索当地的历史文化和美食。';
+		if (addTranslation) {
+			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.";
+		} else {
+			systemInstructions += '\n';
+		}
+		systemInstructions += '[00:33.98] 我很期待和家人一起度过一个难忘的假期。\n';
+		if (addTranslation) {
+			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.";
+		} else {
+			systemInstructions += '\n';
+		}
 	} else if (addPinyin) {
-		systemInstructions += '[00:26.92] 明年我計劃去中國和台灣旅行，探索當地的歷史文化和美食。~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí。\n' +
-			'[00:33.98] 我很期待和家人一起度過一個難忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī';
+		systemInstructions += '[00:26.92] 明年我計劃去中國和台灣旅行，探索當地的歷史文化和美食。~~~ míngnián wǒ jìhuà qù zhōngguó hé táiwān lǚxíng, tànsuǒ dāndì de lìshǐ wénhuà hé měishí';
+		if (addTranslation) {
+			systemInstructions += " ~~~ Next year I plan to travel to China and Taiwan, exploring the local history, culture, and cuisine.";
+		} else {
+			systemInstructions += '\n';
+		}
+		systemInstructions += '[00:33.98] 我很期待和家人一起度過一個難忘的假期。 ~~~ Wǒ hěn qīdài hé jiārén yīqǐ dùguò yīgè nánwàng de jiàqī';
+		if (addTranslation) {
+			systemInstructions += " ~~~ I'm looking forward to spending an unforgettable holiday with my family.";
+		} else {
+			systemInstructions += '\n';
+		}
 	}
 	systemInstructions += '\n';
 
@@ -55,7 +88,7 @@ export async function processLyrics(lrcLibLyrics: LrcLibGetLyricsResponse, openA
 				content: lyrics
 			}
 		],
-		max_tokens: 4096,
+		max_tokens: 4096
 	});
 	console.log({ completion });
 	const processedLyrics = completion.choices[0].message.content ?? lyrics;
