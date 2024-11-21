@@ -1,9 +1,9 @@
 import {GetLyricsResponse, SearchLyricsResponse} from "./generated/api-types";
 import {getLocalStorageAuthToken} from "./Auth.ts";
 
-// const baseUrl = "https://lwktv-worker.cbruegg.workers.dev/";
+const baseUrl = "https://lwktv-worker.cbruegg.workers.dev/";
 
-const baseUrl = "http://localhost:8787/"
+// const baseUrl = "http://localhost:8787/"
 
 export async function searchLyrics(query: string): Promise<SearchLyricsResponse> {
     return (await fetch(`${baseUrl}search?q=${query}`, fetchOptions())).json();
