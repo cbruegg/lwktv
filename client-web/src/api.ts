@@ -8,17 +8,48 @@ export async function searchLyrics(query: string): Promise<SearchLyricsResponse>
     return (await fetch(`${baseUrl}search?q=${query}`, fetchOptions())).json();
 }
 
-export async function getLyrics(id: number, options: {
-    traditionalToSimplified?: boolean,
-    addPinyin?: boolean,
-    addTranslation?: boolean
-}): Promise<GetLyricsResponse> {
+export function getLyrics(id:
+                          number, options: {
+                              traditionalToSimplified?: boolean,
+                              addPinyin?: boolean,
+                              addTranslation?: boolean,
+                          },
+                          getLyricsResponseConsumer: (response: GetLyricsResponse) => void,
+                          syncedLyricsConsumer: (line: string) => void,
+                          plainLyricsConsumer: (line: string) => void
+) {
+
     const params = new URLSearchParams();
     if (options.traditionalToSimplified !== undefined) params.set("traditionalToSimplified", `${options.traditionalToSimplified}`);
     if (options.addPinyin !== undefined) params.set("addPinyin", `${options.addPinyin}`);
     if (options.addTranslation !== undefined) params.set("addTranslation", `${options.addTranslation}`);
-    params.set("api", "v3");
-    return (await fetch(`${baseUrl}lyrics/${id}?${params}`, fetchOptions())).json();
+    params.set("api", "v5");
+    params.set("token", getLocalStorageAuthToken() ?? "");
+    const webSocket = new WebSocket(`${baseUrl}lyrics/${id}?${params}`);
+
+    let didReadGetLyricsResponse = false;
+    let justReadSyncedLyrics = false;
+    let syncedLyrics = "";
+    let plainLyrics = "";
+    webSocket.onmessage = (event) => {
+        console.log({line: event.data});
+        const line = event.data as string;
+        if (!didReadGetLyricsResponse) {
+            const getLyricsResponse = JSON.parse(line);
+            getLyricsResponseConsumer(getLyricsResponse);
+            didReadGetLyricsResponse = true;
+        } else if (justReadSyncedLyrics) {
+            plainLyrics += line + "\n";
+            plainLyricsConsumer(plainLyrics);
+            justReadSyncedLyrics = false;
+        } else {
+            syncedLyrics += line + "\n";
+            syncedLyricsConsumer(syncedLyrics);
+            justReadSyncedLyrics = true;
+        }
+    }
+
+    return () => webSocket.close();
 }
 
 function fetchOptions(): RequestInit {

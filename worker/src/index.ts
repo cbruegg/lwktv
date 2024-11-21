@@ -20,7 +20,6 @@ export default {
 		const responseHeaders = {
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Headers': 'Authorization',
-			'Content-Type': 'application/json',
 			'Cache-Control': 'public, max-age=1209600'
 		};
 
@@ -28,11 +27,11 @@ export default {
 			return new Response(null, { status: 204, headers: responseHeaders });
 		}
 
-		if (request.headers.get('Authorization') !== `Bearer ${env.AUTHENTICATION_TOKEN}`) {
+		const parsedUrl = new URL(request.url);
+
+		if (request.headers.get('Authorization') !== `Bearer ${env.AUTHENTICATION_TOKEN}` && parsedUrl.searchParams.get('token') !== env.AUTHENTICATION_TOKEN) {
 			return new Response('Unauthorized', { status: 401, headers: responseHeaders });
 		}
-
-		const parsedUrl = new URL(request.url);
 
 		const lrcLibFetchOptions = {
 			headers: {
@@ -63,20 +62,32 @@ export default {
 				options.addTranslation = true;
 			}
 
+			const getLyricsResponse = await fetch(`https://lrclib.net/api/get/${id}`, lrcLibFetchOptions);
+			const getLyricsData = await getLyricsResponse.json() as LrcLibGetLyricsResponse;
+
+			const webSocketPair = new WebSocketPair();
+			const [client, server] = Object.values(webSocketPair);
+
+			server.accept();
+			server.addEventListener('message', async (event) => {});
+
 			const cache = caches.default;
 			const cacheKey = new Request(request.url); // Ignore headers
 			const cachedResponse = await cache.match(cacheKey);
 			console.log({ cacheKey: cacheKey.url, cachedResponse });
 			if (cachedResponse !== undefined) {
-				return cachedResponse;
+				const cachedLines = await cachedResponse.text();
+				for (const line of cachedLines.split("\n")) {
+					server.send(line);
+				}
+			} else {
+				ctx.waitUntil((async () => {
+					const lines = await processLyrics(server, getLyricsData, env.OPENAI_API_TOKEN, options);
+					await cache.put(cacheKey, new Response(lines.join('\n'), { headers: responseHeaders }).clone());
+				})());
 			}
 
-			const getLyricsResponse = await fetch(`https://lrclib.net/api/get/${id}`, lrcLibFetchOptions);
-			const getLyricsData = await getLyricsResponse.json() as LrcLibGetLyricsResponse;
-
-			const response = new Response(JSON.stringify(await processLyrics(getLyricsData, env.OPENAI_API_TOKEN, options)), { headers: responseHeaders });
-			await cache.put(cacheKey, response.clone());
-			return response;
+			return new Response(null, { headers: responseHeaders, status:101, webSocket: client });
 		}
 
 		return new Response('Not found', { status: 404, headers: responseHeaders });

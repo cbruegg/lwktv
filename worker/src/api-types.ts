@@ -12,6 +12,4 @@ export interface GetLyricsResponse {
 	albumName: string;
 	duration: number;
 	instrumental: boolean;
-	plainLyrics: string;
-	syncedLyrics: string | null;
 }

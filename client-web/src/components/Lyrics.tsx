@@ -9,13 +9,21 @@ export function Lyrics() {
     const [searchParams, setSearchParams] = useSearchParams();
     const translate = searchParams.get("translate") === "true";
     const [lyrics, setLyrics] = useState<GetLyricsResponse | null>(null);
+    const [plainLyrics, setPlainLyrics] = useState<string | null>(null);
 
     useEffect(() => {
-        (async () => {
-            setLyrics(null);
-            // TODO Allow setting options
-            setLyrics(await getLyrics(id, {addTranslation: translate}));
-        })();
+        setLyrics(null);
+        // TODO Allow setting options
+        const cancel = getLyrics(
+            id,
+            {addTranslation: translate},
+            (response) => setLyrics(response),
+            () => {
+            },
+            (plainLyrics) => setPlainLyrics(plainLyrics)
+        );
+
+        return () => cancel();
     }, [id, translate]);
 
     useEffect(() => {
@@ -48,7 +56,7 @@ export function Lyrics() {
                             }
                             label="Translate"/>
                     </FormGroup>
-                    <PlainLyrics lyrics={lyrics.plainLyrics}/>
+                    {plainLyrics && <PlainLyrics lyrics={plainLyrics}/>}
                 </div>
             )}
         </>
