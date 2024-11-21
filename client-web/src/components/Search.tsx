@@ -28,7 +28,7 @@ export function Search() {
     }, [query]);
 
     return (
-        <div>
+        <div style={{margin: "0 auto"}}>
             <TextField
                 type="text"
                 value={query}
