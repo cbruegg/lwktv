@@ -35,18 +35,17 @@ export function Search() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search for songs..."
             />
-            <div>
+            <List>
                 {results && results.map((result) => (
-                    <List>
-                        <ListItemButton key={result.id} component={Link} to={`/lyrics/${result.id}`}>
-                            <Box>
-                                <Typography variant="button">{result.trackName}</Typography>
-                                <Typography variant="subtitle2" color="textSecondary">{result.artistName}</Typography>
-                            </Box>
-                        </ListItemButton>
-                    </List>
+
+                    <ListItemButton key={result.id} component={Link} to={`/lyrics/${result.id}`}>
+                        <Box>
+                            <Typography variant="button">{result.trackName}</Typography>
+                            <Typography variant="subtitle2" color="textSecondary">{result.artistName}</Typography>
+                        </Box>
+                    </ListItemButton>
                 ))}
-            </div>
+            </List>
         </div>
     );
 }
