@@ -81,7 +81,7 @@ function LyricsLine({line}: { line: string }) {
 
     const lines = line.split("~~~");
     return (
-        <p>
+        <p className="lyrics-line">
             {lines.map((line, i) => (
                 <span key={i}>
                     {line}

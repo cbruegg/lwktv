@@ -1,6 +1,18 @@
 .content {
-  margin: 0 auto;
-  padding: 2rem;
-  display: flex;
-  place-items: center;
+    padding: 2rem;
+    display: flex;
+    place-items: center;
+}
+
+.lyrics-line {
+    animation: fade-in 1s;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }

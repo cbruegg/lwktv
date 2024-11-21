@@ -24,7 +24,7 @@ export function Root() {
         <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end"}}>
             <Button onClick={() => logout()}>Logout</Button>
         </div>
-        <div style={{flexGrow: 1, display: "flex", justifyContent: "center", padding: "2rem"}}>
+        <div style={{flexGrow: 1, display: "flex", padding: "2rem"}}>
             <AuthDialog open={authToken === null} onSave={() => setAuthToken(getLocalStorageAuthToken)}/>
             {authToken !== null && (navigation.state == "loading" ? <CircularProgress/> : <Outlet/>)}
         </div>

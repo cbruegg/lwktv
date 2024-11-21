@@ -14,6 +14,7 @@ import { LrcLibGetLyricsResponse } from './lrclib-api-types';
 import { processLyrics, ProcessLyricsOptions } from './lyrics-processor';
 import OpenAI from 'openai';
 import { SearchLyricsResponse } from './api-types';
+import { sleep } from 'openai/core';
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
@@ -78,10 +79,12 @@ export default {
 			console.log({ cacheKey: cacheKey.url, cachedResponse });
 			if (cachedResponse !== undefined) {
 				const cachedLines = await cachedResponse.text();
-				for (const line of cachedLines.split('\n')) {
-					server.send(line);
-				}
-				server.send('%EOF%');
+				ctx.waitUntil((async () => {
+					for (const line of cachedLines.split('\n')) {
+						server.send(line);
+					}
+					server.send('%EOF%');
+				})());
 			} else {
 				ctx.waitUntil((async () => {
 					const lines = await processLyrics(server, getLyricsData, env.OPENAI_API_TOKEN, options);
