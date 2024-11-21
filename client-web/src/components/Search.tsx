@@ -2,24 +2,26 @@ import {useEffect, useState} from "react";
 import {SearchLyricsResponse} from "../generated/api-types.ts";
 import {searchLyrics} from "../api.ts";
 import {Link} from "react-router-dom";
-import {Box, List, ListItemButton, TextField, Typography} from "@mui/material";
+import {Box, Button, List, ListItemButton, TextField, Typography} from "@mui/material";
 
 export function Search() {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<SearchLyricsResponse | null>(null);
+    const [response, setResponse] = useState<SearchLyricsResponse | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSearch = async (query: string) => {
         if (query) {
-            const results = await searchLyrics(query);
-            setResults(results);
+            const response = await searchLyrics(query);
+            setResponse(response);
+            setIsLoading(false);
         } else {
-            setResults([]);
+            setResponse(null);
         }
     };
 
     useEffect(() => {
-        const handler = setTimeout(() => {
-            handleSearch(query);
+        const handler = setTimeout(async () => {
+            await handleSearch(query);
         }, 500);
 
         return () => {
@@ -32,11 +34,19 @@ export function Search() {
             <TextField
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                    setIsLoading(true);
+                    setQuery(e.target.value);
+                }}
                 placeholder="Search for songs..."
             />
+            <br/>
+            {!isLoading && response && response.resolvedQuery !== query && response.resolvedQuery !== "" &&
+                <Button onClick={() => setQuery(response.resolvedQuery)}>Did you
+                    mean: {response.resolvedQuery}</Button>
+            }
             <List>
-                {results && results.map((result) => (
+                {response && response.results.map((result) => (
 
                     <ListItemButton key={result.id} component={Link} to={`/lyrics/${result.id}`}>
                         <Box>

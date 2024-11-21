@@ -13,7 +13,7 @@
 import { LrcLibGetLyricsResponse } from './lrclib-api-types';
 import { processLyrics, ProcessLyricsOptions } from './lyrics-processor';
 import OpenAI from 'openai';
-import { SearchLyricsResponse } from './api-types';
+import { SearchLyricsResponse, SearchLyricsResult } from './api-types';
 import { sleep } from 'openai/core';
 
 export default {
@@ -42,13 +42,32 @@ export default {
 
 		if (parsedUrl.pathname.startsWith('/search')) {
 			const query = new URL(request.url).searchParams.get('q') ?? '';
-			const queryInTraditionalChinese = await convertToTraditionalChinese(query, env.OPENAI_API_TOKEN);
+			let resolvedQuery = query;
+			console.log({ query });
+			if (query.includes('open.spotify.com')) {
+				console.log('Spotify URL detected');
+				// Make it look like Chrome UA
+				const titleResponse = await (await fetch(query, {
+					headers: {
+						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+					}
+				})).text();
+				console.log({ titleResponse });
+				const titleMatch = titleResponse.match(/<meta\s+property="og:title"\s+content="([^"]+)"/);
+				if (titleMatch !== null) {
+					console.log('Matched title', titleMatch[1]);
+					resolvedQuery = titleMatch[1];
+				}
+			}
 
-			const searchLyricsResponse = fetch(`https://lrclib.net/api/search?q=${query}`, lrcLibFetchOptions);
+			const queryInTraditionalChinese = await convertToTraditionalChinese(resolvedQuery, env.OPENAI_API_TOKEN);
+			const searchLyricsResponse = fetch(`https://lrclib.net/api/search?q=${resolvedQuery}`, lrcLibFetchOptions);
 			const searchLyricsResponseTraditional = fetch(`https://lrclib.net/api/search?q=${queryInTraditionalChinese}`, lrcLibFetchOptions);
-			const searchLyricsData: SearchLyricsResponse = await (await searchLyricsResponse).json();
-			const searchLyricsDataTraditional: SearchLyricsResponse = await (await searchLyricsResponseTraditional).json();
-			return new Response(JSON.stringify(mergeResponses(searchLyricsData, searchLyricsDataTraditional)), { headers: responseHeaders });
+			const searchLyricsData: SearchLyricsResult[] = await (await searchLyricsResponse).json();
+			const searchLyricsDataTraditional: SearchLyricsResult[] = await (await searchLyricsResponseTraditional).json();
+			const mergedResults = mergeResults(searchLyricsData, searchLyricsDataTraditional);
+			const response: SearchLyricsResponse = { resolvedQuery, results: mergedResults };
+			return new Response(JSON.stringify(response), { headers: responseHeaders });
 		}
 		if (parsedUrl.pathname.startsWith('/lyrics')) {
 			const id = parsedUrl.pathname.split('/')[2];
@@ -130,10 +149,10 @@ async function convertToTraditionalChinese(text: string, openAiApiToken: string)
 	return processedText.trim();
 }
 
-function mergeResponses(a: SearchLyricsResponse, b: SearchLyricsResponse): SearchLyricsResponse {
+function mergeResults(a: SearchLyricsResult[], b: SearchLyricsResult[]): SearchLyricsResult[] {
 	// SearchLyricsResponse is an array of objects that have an ID. Make sure we don't have duplicates.
 	const ids = new Set<number>();
-	const result: SearchLyricsResponse = [];
+	const result: SearchLyricsResult[] = [];
 	for (const item of a) {
 		if (!ids.has(item.id)) {
 			result.push(item);
