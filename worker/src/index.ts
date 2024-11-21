@@ -69,7 +69,8 @@ export default {
 			const [client, server] = Object.values(webSocketPair);
 
 			server.accept();
-			server.addEventListener('message', async (event) => {});
+			server.addEventListener('message', async (event) => {
+			});
 
 			const cache = caches.default;
 			const cacheKey = new Request(request.url); // Ignore headers
@@ -77,17 +78,19 @@ export default {
 			console.log({ cacheKey: cacheKey.url, cachedResponse });
 			if (cachedResponse !== undefined) {
 				const cachedLines = await cachedResponse.text();
-				for (const line of cachedLines.split("\n")) {
+				for (const line of cachedLines.split('\n')) {
 					server.send(line);
 				}
+				server.send('%EOF%');
 			} else {
 				ctx.waitUntil((async () => {
 					const lines = await processLyrics(server, getLyricsData, env.OPENAI_API_TOKEN, options);
+					server.send('%EOF%');
 					await cache.put(cacheKey, new Response(lines.join('\n'), { headers: responseHeaders }).clone());
 				})());
 			}
 
-			return new Response(null, { headers: responseHeaders, status:101, webSocket: client });
+			return new Response(null, { headers: responseHeaders, status: 101, webSocket: client });
 		}
 
 		return new Response('Not found', { status: 404, headers: responseHeaders });

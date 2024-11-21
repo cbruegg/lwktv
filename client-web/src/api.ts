@@ -1,8 +1,9 @@
 import {GetLyricsResponse, SearchLyricsResponse} from "./generated/api-types";
 import {getLocalStorageAuthToken} from "./Auth.ts";
 
-const baseUrl = "https://lwktv-worker.cbruegg.workers.dev/";
-// const baseUrl = "http://localhost:8787/"
+// const baseUrl = "https://lwktv-worker.cbruegg.workers.dev/";
+
+const baseUrl = "http://localhost:8787/"
 
 export async function searchLyrics(query: string): Promise<SearchLyricsResponse> {
     return (await fetch(`${baseUrl}search?q=${query}`, fetchOptions())).json();
@@ -34,7 +35,10 @@ export function getLyrics(id:
     webSocket.onmessage = (event) => {
         console.log({line: event.data});
         const line = event.data as string;
-        if (!didReadGetLyricsResponse) {
+
+        if (line == "%EOF%") {
+            webSocket.close();
+        } else if (!didReadGetLyricsResponse) {
             const getLyricsResponse = JSON.parse(line);
             getLyricsResponseConsumer(getLyricsResponse);
             didReadGetLyricsResponse = true;
