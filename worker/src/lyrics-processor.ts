@@ -81,6 +81,8 @@ export async function processLyrics(
 	}
 	systemInstructions += '\n';
 
+	const requestStart = Date.now();
+	console.log({ openAiRequest: 'lyrics-processing', event: 'request_start', requestStart });
 	const completion = await openai.chat.completions.create({
 		model: 'gpt-5',
 		messages: [
@@ -114,10 +116,22 @@ export async function processLyrics(
 	));
 
 	let currentLine = '';
+	let chunkCount = 0;
+	let firstDeltaTimestamp: number | null = null;
 	for await (const processedLyrics of completion) {
 		const delta = processedLyrics.choices[0]?.delta?.content ?? '';
 
 		console.log({ delta });
+
+		if (firstDeltaTimestamp === null) {
+			firstDeltaTimestamp = Date.now();
+			console.log({
+				openAiRequest: 'lyrics-processing',
+				event: 'first_delta',
+				latencyMs: firstDeltaTimestamp - requestStart
+			});
+		}
+		chunkCount += 1;
 
 		currentLine += delta;
 		const lines = currentLine.split('\n');
@@ -130,6 +144,14 @@ export async function processLyrics(
 		}
 		currentLine = lines[lines.length - 1];
 	}
+	const totalDurationMs = Date.now() - requestStart;
+	console.log({
+		openAiRequest: 'lyrics-processing',
+		event: 'stream_complete',
+		durationMs: totalDurationMs,
+		chunkCount,
+		firstDeltaLatencyMs: firstDeltaTimestamp === null ? null : firstDeltaTimestamp - requestStart
+	});
 
 	return allLines;
 }

@@ -139,6 +139,8 @@ async function convertToTraditionalChinese(text: string, openAiApiToken: string)
 		'You should output:\n' +
 		'工廠';
 
+	const requestStart = Date.now();
+	console.log({ openAiRequest: 'title-conversion', event: 'request_start', requestStart });
 	const conversionCompletion = await openai.chat.completions.create({
 		model: 'gpt-5',
 		messages: [
@@ -149,6 +151,11 @@ async function convertToTraditionalChinese(text: string, openAiApiToken: string)
 			}
 		],
 		max_completion_tokens: 512
+	});
+	console.log({
+		openAiRequest: 'title-conversion',
+		event: 'request_complete',
+		durationMs: Date.now() - requestStart
 	});
 	console.log({ conversionCompletion });
 	const processedText = conversionCompletion.choices[0].message.content ?? text;
