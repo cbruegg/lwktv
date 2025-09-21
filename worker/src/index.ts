@@ -131,7 +131,7 @@ async function convertToTraditionalChinese(text: string, openAiApiToken: string)
 		'工廠';
 
 	const conversionCompletion = await openai.chat.completions.create({
-		model: 'gpt-4o-mini',
+		model: 'gpt-5',
 		messages: [
 			{ role: 'system', content: systemInstructions },
 			{

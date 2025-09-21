@@ -82,7 +82,7 @@ export async function processLyrics(
 	systemInstructions += '\n';
 
 	const completion = await openai.chat.completions.create({
-		model: 'gpt-4o',
+		model: 'gpt-5',
 		messages: [
 			{ role: 'system', content: systemInstructions },
 			{
