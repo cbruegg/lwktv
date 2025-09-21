@@ -90,7 +90,7 @@ export async function processLyrics(
 				content: lyrics
 			}
 		],
-		max_tokens: 4096,
+		max_completion_tokens: 4096,
 		stream: true
 	});
 	console.log({ completion });

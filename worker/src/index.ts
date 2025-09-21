@@ -148,7 +148,7 @@ async function convertToTraditionalChinese(text: string, openAiApiToken: string)
 				content: text
 			}
 		],
-		max_tokens: 512
+		max_completion_tokens: 512
 	});
 	console.log({ conversionCompletion });
 	const processedText = conversionCompletion.choices[0].message.content ?? text;
