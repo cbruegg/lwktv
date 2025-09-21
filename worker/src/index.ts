@@ -46,17 +46,26 @@ export default {
 			console.log({ query });
 			if (query.includes('open.spotify.com')) {
 				console.log('Spotify URL detected');
-				// Make it look like Chrome UA
-				const titleResponse = await (await fetch(query, {
-					headers: {
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+				try {
+					const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(query)}`;
+					const oembedResponse = await fetch(oembedUrl);
+					if (oembedResponse.ok) {
+						const oembedData: { title?: string } = await oembedResponse.json();
+						const title = oembedData.title?.trim();
+						if (title) {
+							console.log('Resolved Spotify title', title);
+							resolvedQuery = title;
+						} else {
+							console.log('Spotify oEmbed missing title', oembedData);
+						}
+					} else {
+						console.log('Spotify oEmbed request failed', {
+							status: oembedResponse.status,
+							statusText: oembedResponse.statusText
+						});
 					}
-				})).text();
-				console.log({ titleResponse });
-				const titleMatch = titleResponse.match(/<meta\s+property="og:title"\s+content="([^"]+)"/);
-				if (titleMatch !== null) {
-					console.log('Matched title', titleMatch[1]);
-					resolvedQuery = titleMatch[1];
+				} catch (error) {
+					console.log('Spotify oEmbed fetch failed', error);
 				}
 			}
 
