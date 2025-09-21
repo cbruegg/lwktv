@@ -150,7 +150,8 @@ async function convertToTraditionalChinese(text: string, openAiApiToken: string)
 				content: text
 			}
 		],
-		max_completion_tokens: 512
+		max_completion_tokens: 512,
+		reasoning_effort: 'minimal'
 	});
 	console.log({
 		openAiRequest: 'title-conversion',

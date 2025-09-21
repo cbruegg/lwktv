@@ -93,6 +93,7 @@ export async function processLyrics(
 			}
 		],
 		max_completion_tokens: 4096,
+		reasoning_effort: 'minimal',
 		stream: true
 	});
 	console.log({ completion });
