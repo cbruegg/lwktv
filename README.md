@@ -15,9 +15,11 @@ There are two components:
 1. The `worker` directory contains a CloudFlare Worker that fetches lyrics from LRCLI and runs them through GPT-4.
 2. The `client-web` directory contains a React app that calls the API and displays results
 
-To deploy the worker, create a CloudFlare account, set up the Wrangler CLI and run `npm run deploy` in the `worker` directory.
+The worker is deployed automatically from `main` by the GitHub Actions workflow in `.github/workflows/deploy-worker.yml`.
+It runs the Wrangler CLI with the repository secrets `WORKER_AUTHENTICATION_TOKEN`, `WORKER_OPENAI_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN`.
+If you need to deploy manually, create a CloudFlare account, set up the Wrangler CLI and run `npm run deploy` in the `worker` directory.
 Run `wrangler secret put AUTHENTICATION_TOKEN` and set a random password. The client will ask for this password. Use a safe password to protect your API.
 Run `wrangler secret put OPENAI_API_TOKEN` and provide an API token for OpenAI. This can be obtained on https://platform.openai.com/.
 
-To deploy the client, replace the API base URL in `client-web/src/api.ts` with your just deployed worker's URL. Then run `npm run build`.
-Finally, host the contents of the resulting `client-web/dist` directory anywhere you like. This can be any web server, including GitHub Pages or CloudFlare Pages.
+The `client-web` app is deployed via the GitHub ↔ CloudFlare Pages continuous deployment integration, so pushes to `main` publish automatically.
+If you prefer to deploy manually, replace the API base URL in `client-web/src/api.ts` with your worker URL, run `npm run build`, and host the contents of `client-web/dist` on any web server (e.g. GitHub Pages or CloudFlare Pages).
